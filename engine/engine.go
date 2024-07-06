@@ -2,11 +2,11 @@ package engine
 
 type Value struct {
 	Data float64
-	Prev TupleSet
+	Prev *TupleSet
 }
 
 func NewValue(data float64, prev TupleSet) *Value {
-	return &Value{data, prev}
+	return &Value{data, &prev}
 }
 
 func (v *Value) Add(v2 *Value) *Value {

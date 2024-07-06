@@ -21,7 +21,7 @@ type TupleSet struct {
 	s []Tuple
 }
 
-func NewSet() *TupleSet {
+func NewTupleSet() *TupleSet {
 	return &TupleSet{s: []Tuple{}}
 }
 
