@@ -7,3 +7,7 @@ type Value struct {
 func (v *Value) Add(v2 *Value) *Value {
 	return &Value{v.Data + v2.Data}
 }
+
+func (v *Value) Multiply(v2 *Value) *Value {
+	return &Value{v.Data * v2.Data}
+}
