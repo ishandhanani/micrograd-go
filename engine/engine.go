@@ -1,22 +1,20 @@
 package engine
 
-type children struct {
-	current *Value // in the video this is self
-	other   *Value // in the video this is other
-}
 type Value struct {
 	Data float64
-	prev []*children // in the video this is a set of children tuples
+	Prev TupleSet
 }
 
-func NewValue(data float64, prev []*children) *Value {
+func NewValue(data float64, prev TupleSet) *Value {
 	return &Value{data, prev}
 }
 
 func (v *Value) Add(v2 *Value) *Value {
-	return &Value{Data: v.Data + v2.Data, prev: []*children{{current: v, other: v2}}}
+	v.Prev.Add(&Tuple{v, v2})
+	return &Value{Data: v.Data + v2.Data, Prev: v.Prev}
 }
 
 func (v *Value) Multiply(v2 *Value) *Value {
-	return &Value{Data: v.Data * v2.Data, prev: []*children{{current: v, other: v2}}}
+	v.Prev.Add(&Tuple{v, v2})
+	return &Value{Data: v.Data * v2.Data, Prev: v.Prev}
 }
