@@ -1,18 +1,62 @@
 package engine
 
-type Tuple struct {
-	curr *Value
-	next *Value
+import (
+	"fmt"
+
+	"github.com/tmc/dot"
+)
+
+func trace(root *Value) (map[*Value]struct{}, map[*Value][]*Value) {
+	nodes := make(map[*Value]struct{})
+	edges := make(map[*Value][]*Value)
+	var build func(*Value)
+	build = func(v *Value) {
+		if _, exists := nodes[v]; !exists {
+			nodes[v] = struct{}{}
+			for _, child := range v.Prev {
+				edges[v] = append(edges[v], child)
+				build(child)
+			}
+		}
+	}
+	build(root)
+	fmt.Println(nodes)
+	fmt.Println(edges)
+	return nodes, edges
 }
 
-func NewTuple(a *Value, b *Value) *Tuple {
-	return &Tuple{a, b}
-}
+func DrawDot(root *Value) string {
+	nodes, edges := trace(root)
+	g := dot.NewGraph("G")
+	g.SetType(dot.DIGRAPH)
+	g.Set("rankdir", "LR")
 
-func (t *Tuple) GetCurr() *Value {
-	return t.curr
-}
+	for n := range nodes {
+		nodeID := fmt.Sprintf("%p", n)
+		node, _ := g.AddNode(dot.NewNode(nodeID))
+		node.Set("shape", "record")
+		// node.Set("label", fmt.Sprintf("{ %v | data %.4f | grad %.4f }", n._label, n.data, n.grad))
+		node.Set("label", fmt.Sprintf("{data %.4f }", n.Data))
 
-func (t *Tuple) GetNext() *Value {
-	return t.next
+		if n.op != "" {
+			opNodeID := fmt.Sprintf("%p%s", n, n.op)
+			opNode, _ := g.AddNode(dot.NewNode(opNodeID))
+			opNode.Set("label", string(n.op))
+			g.AddEdge(dot.NewEdge(opNode, node))
+		}
+	}
+
+	for parent, children := range edges {
+		for _, child := range children {
+			childOpNodeID := fmt.Sprintf("%p%s", parent, parent.op)
+			g.AddEdge(dot.NewEdge(dot.NewNode(fmt.Sprintf("%p", child)), dot.NewNode(childOpNodeID)))
+		}
+	}
+
+	err := g.ToPNG("test.png")
+	if err != nil {
+		return err.Error()
+	}
+
+	return g.String()
 }

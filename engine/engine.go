@@ -1,21 +1,25 @@
 package engine
 
+import "fmt"
+
 type Value struct {
 	Data float64
-	Prev []*Tuple
-	Op   string
+	Prev []*Value
+	op   string
 }
 
-func NewValue(data float64, prev []*Tuple, op string) *Value {
+func NewValue(data float64, prev []*Value, op string) *Value {
 	return &Value{data, prev, op}
 }
 
 func (v *Value) Add(v2 *Value) *Value {
-	v.Prev = append(v.Prev, &Tuple{v, v2})
-	return &Value{Data: v.Data + v2.Data, Prev: []*Tuple{{v, v2}}, Op: "+"}
+	return &Value{Data: v.Data + v2.Data, Prev: []*Value{v, v2}, op: "+"}
 }
 
 func (v *Value) Multiply(v2 *Value) *Value {
-	v.Prev = append(v.Prev, &Tuple{v, v2})
-	return &Value{Data: v.Data * v2.Data, Prev: []*Tuple{{v, v2}}, Op: "*"}
+	return &Value{Data: v.Data * v2.Data, Prev: []*Value{v, v2}, op: "*"}
+}
+
+func (v *Value) String() string {
+	return fmt.Sprintf("Value(data=%v)", v.Data)
 }
