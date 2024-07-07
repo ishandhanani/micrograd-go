@@ -36,7 +36,7 @@ func DrawDot(root *Value) string {
 		node, _ := g.AddNode(dot.NewNode(nodeID))
 		node.Set("shape", "record")
 		// node.Set("label", fmt.Sprintf("{ %v | data %.4f | grad %.4f }", n._label, n.data, n.grad))
-		node.Set("label", fmt.Sprintf("{ %s | data %.4f }", n.Label, n.Data))
+		node.Set("label", fmt.Sprintf("{ %s | data %.4f | grad %.4f }", n.Label, n.Data, n.Grad))
 
 		if n.op != "" {
 			opNodeID := fmt.Sprintf("%p%s", n, n.op)

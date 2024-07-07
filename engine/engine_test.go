@@ -44,8 +44,33 @@ func Test_Diagram(t *testing.T) {
 	c := engine.NewValue(10.0, "c", []*engine.Value{})
 	e := a.Multiply(b).AddLabel("e")
 	d := e.Add(c).AddLabel("d")
+	f := engine.NewValue(-2.0, "f", []*engine.Value{})
+	L := d.Multiply(f).AddLabel("L")
 
-	str := engine.DrawDot(d)
+	str := engine.DrawDot(L)
+
+	fmt.Println(str)
+}
+
+func Test_NeuronBackpropExample(t *testing.T) {
+	// inputs x1m x2
+	x1 := engine.NewValue(2.0, "x1", []*engine.Value{})
+	x2 := engine.NewValue(0.0, "x2", []*engine.Value{})
+	// weights w1, w2
+	w1 := engine.NewValue(-3.0, "w1", []*engine.Value{})
+	w2 := engine.NewValue(1.0, "w2", []*engine.Value{})
+	// neuron bias
+	b := engine.NewValue(6.7, "b", []*engine.Value{})
+
+	x1w1 := x1.Multiply(w1).AddLabel("x1w1")
+	x2w2 := x2.Multiply(w2).AddLabel("x2w2")
+	x1w1x2w2 := x1w1.Add(x2w2).AddLabel("x1w1 + x2w2")
+	n := x1w1x2w2.Add(b).AddLabel("n")
+
+	// activation function
+	o := n.Tanh().AddLabel("o")
+
+	str := engine.DrawDot(o)
 
 	fmt.Println(str)
 }
