@@ -13,7 +13,7 @@ func trace(root *Value) (map[*Value]struct{}, map[*Value][]*Value) {
 	build = func(v *Value) {
 		if _, exists := nodes[v]; !exists {
 			nodes[v] = struct{}{}
-			for _, child := range v.Prev {
+			for _, child := range v.prev {
 				edges[v] = append(edges[v], child)
 				build(child)
 			}
@@ -36,7 +36,7 @@ func DrawDot(root *Value) string {
 		node, _ := g.AddNode(dot.NewNode(nodeID))
 		node.Set("shape", "record")
 		// node.Set("label", fmt.Sprintf("{ %v | data %.4f | grad %.4f }", n._label, n.data, n.grad))
-		node.Set("label", fmt.Sprintf("{data %.4f }", n.Data))
+		node.Set("label", fmt.Sprintf("{ %s | data %.4f }", n.Label, n.Data))
 
 		if n.op != "" {
 			opNodeID := fmt.Sprintf("%p%s", n, n.op)
