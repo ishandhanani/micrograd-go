@@ -19,11 +19,21 @@ func NewValue(data float64, label string, prev []*Value) *Value {
 }
 
 func (v *Value) Add(v2 *Value) *Value {
-	return &Value{Data: v.Data + v2.Data, prev: []*Value{v, v2}, op: "+"}
+	out := &Value{Data: v.Data + v2.Data, prev: []*Value{v, v2}, op: "+"}
+	out.backward = func(v *Value) {
+		v.Grad = 1.0 * out.Grad
+		v2.Grad = 1.0 * out.Grad
+	}
+	return out
 }
 
 func (v *Value) Multiply(v2 *Value) *Value {
-	return &Value{Data: v.Data * v2.Data, prev: []*Value{v, v2}, op: "*"}
+	out := &Value{Data: v.Data * v2.Data, prev: []*Value{v, v2}, op: "*"}
+	out.backward = func(v *Value) {
+		v.Grad = out.Grad * v.Data
+		v2.Grad = out.Grad * v2.Data
+	}
+	return out
 }
 
 func (v *Value) Tanh() *Value {
