@@ -70,6 +70,12 @@ func Test_NeuronBackpropExample(t *testing.T) {
 	// activation function
 	o := n.Tanh().AddLabel("o")
 
+	// manual global derivative
+	o.Grad = 1.0
+
+	// manual backward pass
+	o.Backward()
+
 	str := engine.DrawDot(o)
 
 	fmt.Println(str)

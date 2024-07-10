@@ -11,7 +11,7 @@ type Value struct {
 	Grad     float64
 	prev     []*Value
 	op       string
-	backward func(v *Value)
+	Backward func()
 }
 
 func NewValue(data float64, label string, prev []*Value) *Value {
@@ -20,24 +20,31 @@ func NewValue(data float64, label string, prev []*Value) *Value {
 
 func (v *Value) Add(v2 *Value) *Value {
 	out := &Value{Data: v.Data + v2.Data, prev: []*Value{v, v2}, op: "+"}
-	out.backward = func(v *Value) {
+	out.Backward = func() {
 		v.Grad = 1.0 * out.Grad
 		v2.Grad = 1.0 * out.Grad
 	}
+	out.Backward()
 	return out
 }
 
 func (v *Value) Multiply(v2 *Value) *Value {
 	out := &Value{Data: v.Data * v2.Data, prev: []*Value{v, v2}, op: "*"}
-	out.backward = func(v *Value) {
-		v.Grad = out.Grad * v.Data
-		v2.Grad = out.Grad * v2.Data
+	out.Backward = func() {
+		v.Grad = out.Grad * v2.Data
+		v2.Grad = out.Grad * v.Data
 	}
+	out.Backward()
 	return out
 }
 
 func (v *Value) Tanh() *Value {
-	return &Value{Data: math.Tanh(v.Data), prev: []*Value{v}, op: "tanh"}
+	out := &Value{Data: math.Tanh(v.Data), prev: []*Value{v}, op: "tanh"}
+	out.Backward = func() {
+		v.Grad = (1 - (v.Data * v.Data)) * out.Grad
+	}
+	out.Backward()
+	return out
 }
 
 func (v *Value) String() string {
