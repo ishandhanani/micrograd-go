@@ -26,9 +26,6 @@ func NewNeuron(nin int) *Neuron {
 }
 
 func (n *Neuron) Call(x []*engine.Value) *engine.Value {
-	if len(x) != len(n.Weight) {
-		panic("Length of x must be equal to length of n.Weight")
-	}
 	zipped := make([][]*engine.Value, len(x))
 	neuron := NewNeuron(len(x))
 	for i := 0; i < len(x); i++ {
@@ -84,4 +81,10 @@ func NewMLP(nin int, nout []int) *MLP {
 	return &MLP{layers}
 }
 
-// func (m *MLP) Call(x []*engine.Value) []*engine.Value {
+func (m *MLP) Call(x []*engine.Value) []*engine.Value {
+	for _, layer := range m.Layers {
+		new := layer.Call(x)
+		x = new
+	}
+	return x
+}
