@@ -28,6 +28,16 @@ func (v *Value) Add(v2 *Value) *Value {
 	return out
 }
 
+func Negate(v *Value) *Value {
+	v.Data = v.Data * -1
+	return v
+}
+
+func (v *Value) Subtract(v2 *Value) *Value {
+	negated := Negate(v2)
+	return v.Add(negated)
+}
+
 func (v *Value) Multiply(v2 *Value) *Value {
 	out := &Value{Data: v.Data * v2.Data, prev: []*Value{v, v2}, op: "*"}
 	out.Backward = func() {
@@ -38,10 +48,38 @@ func (v *Value) Multiply(v2 *Value) *Value {
 	return out
 }
 
-func (v *Value) Tanh() *Value {
+func Pow(v *Value, v2 *Value) *Value {
+	out := &Value{Data: math.Pow(v.Data, v2.Data), prev: []*Value{v, v2}, op: "^"}
+	out.Backward = func() {
+		v.Grad += (v2.Data * math.Pow(v.Data, v2.Data-1)) * out.Grad
+		v2.Grad += (v.Data * math.Pow(v.Data, v2.Data)) * out.Grad
+	}
+	out.Backward()
+	return out
+}
+
+func (v *Value) SimpleTanh() *Value {
 	out := &Value{Data: math.Tanh(v.Data), prev: []*Value{v}, op: "tanh"}
 	out.Backward = func() {
 		v.Grad += (1 - (v.Data * v.Data)) * out.Grad
+	}
+	out.Backward()
+	return out
+}
+
+func (v *Value) Tanh() *Value {
+	out := &Value{Data: (math.Exp(2*v.Data) - 1) / (math.Exp(2*v.Data) + 1), prev: []*Value{v}, op: "tanh"}
+	out.Backward = func() {
+		v.Grad += (1 - math.Pow(out.Data, 2)) * out.Grad
+	}
+	out.Backward()
+	return out
+}
+
+func Exp(v *Value) *Value {
+	out := &Value{Data: math.Exp(v.Data), prev: []*Value{v}, op: "exp"}
+	out.Backward = func() {
+		v.Grad += out.Grad * out.Data
 	}
 	out.Backward()
 	return out

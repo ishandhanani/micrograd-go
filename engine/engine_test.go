@@ -70,7 +70,6 @@ func Test_NeuronBackpropExample(t *testing.T) {
 	x1w1x2w2 := x1w1.Add(x2w2).AddLabel("x1w1 + x2w2")
 	n := x1w1x2w2.Add(b).AddLabel("n")
 
-	// activation function
 	o := n.Tanh().AddLabel("o")
 
 	// manual global derivative
@@ -96,10 +95,7 @@ func Test_TopologicalSort(t *testing.T) {
 	x1w1x2w2 := x1w1.Add(x2w2).AddLabel("x1w1 + x2w2")
 	n := x1w1x2w2.Add(b).AddLabel("n")
 
-	// activation function
 	o := n.Tanh().AddLabel("o")
-
-	// manual global derivative
 	o.Grad = 1.0
 
 	sorted := engine.TopologicalSort(o)
@@ -115,10 +111,7 @@ func Test_AutomaticBackpropagation(t *testing.T) {
 	x1w1x2w2 := x1w1.Add(x2w2).AddLabel("x1w1 + x2w2")
 	n := x1w1x2w2.Add(b).AddLabel("n")
 
-	// activation function
 	o := n.Tanh().AddLabel("o")
-
-	// manual global derivative
 	o.Grad = 1.0
 
 	// automatic backward pass
