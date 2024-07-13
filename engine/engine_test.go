@@ -49,8 +49,19 @@ func Test_Diagram(t *testing.T) {
 	fmt.Println(str)
 }
 
+/**
+ * For completeness - heres how the Pytorch code looks like for the same setup
+ * x1 = torch.Tensorr([2.0]).requires_grad_(True)
+ * x2 = torch.Tensorr([0.0]).requires_grad_(True)
+ * w1 = torch.Tensorr([-3.0]).requires_grad_(True)
+ * w2 = torch.Tensorr([1.0]).requires_grad_(True)
+ * b = torch.Tensorr([6.7]).requires_grad_(True)
+ * n = x1*x2 + w1*w2 + b
+ * o = torch.tanh(n)
+ * o.backward()
+ */
+
 func SetupNeuralNetwork() (x1, x2, w1, w2, b *engine.Value) {
-	// inputs x1m x2
 	x1 = engine.NewValue(2.0, "x1", []*engine.Value{})
 	x2 = engine.NewValue(0.0, "x2", []*engine.Value{})
 	// weights w1, w2
