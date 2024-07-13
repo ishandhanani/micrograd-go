@@ -21,8 +21,8 @@ func NewValue(data float64, label string, prev []*Value) *Value {
 func (v *Value) Add(v2 *Value) *Value {
 	out := &Value{Data: v.Data + v2.Data, prev: []*Value{v, v2}, op: "+"}
 	out.Backward = func() {
-		v.Grad = 1.0 * out.Grad
-		v2.Grad = 1.0 * out.Grad
+		v.Grad += 1.0 * out.Grad
+		v2.Grad += 1.0 * out.Grad
 	}
 	out.Backward()
 	return out
@@ -31,8 +31,8 @@ func (v *Value) Add(v2 *Value) *Value {
 func (v *Value) Multiply(v2 *Value) *Value {
 	out := &Value{Data: v.Data * v2.Data, prev: []*Value{v, v2}, op: "*"}
 	out.Backward = func() {
-		v.Grad = out.Grad * v2.Data
-		v2.Grad = out.Grad * v.Data
+		v.Grad += out.Grad * v2.Data
+		v2.Grad += out.Grad * v.Data
 	}
 	out.Backward()
 	return out
@@ -41,7 +41,7 @@ func (v *Value) Multiply(v2 *Value) *Value {
 func (v *Value) Tanh() *Value {
 	out := &Value{Data: math.Tanh(v.Data), prev: []*Value{v}, op: "tanh"}
 	out.Backward = func() {
-		v.Grad = (1 - (v.Data * v.Data)) * out.Grad
+		v.Grad += (1 - (v.Data * v.Data)) * out.Grad
 	}
 	out.Backward()
 	return out
@@ -61,4 +61,49 @@ func (v *Value) GetOp() string {
 func (v *Value) AddLabel(label string) *Value {
 	v.Label = label
 	return v
+}
+
+func TopologicalSort(root *Value) []*Value {
+	sorted := []*Value{}
+	visited := make(map[*Value]bool)
+
+	var topo func(*Value)
+	topo = func(v *Value) {
+		if !visited[v] {
+			visited[v] = true
+			for _, child := range v.prev {
+				topo(child)
+			}
+			sorted = append(sorted, v)
+		}
+	}
+	topo(root)
+
+	return sorted
+}
+
+func (v *Value) BackwardPass() {
+	topo := []*Value{}
+	visited := map[*Value]bool{}
+
+	topo = buildTopo(v, topo, visited)
+
+	v.Grad = 1.0
+
+	for i := len(topo) - 1; i >= 0; i-- {
+		if len(topo[i].prev) != 0 { // added this because there are multiple variations of topological sort for a single graph
+			topo[i].Backward()
+		}
+	}
+}
+
+func buildTopo(v *Value, topo []*Value, visited map[*Value]bool) []*Value {
+	if !visited[v] {
+		visited[v] = true
+		for _, prev := range v.prev {
+			topo = buildTopo(prev, topo, visited)
+		}
+		topo = append(topo, v)
+	}
+	return topo
 }

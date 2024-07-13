@@ -25,7 +25,7 @@ func trace(root *Value) (map[*Value]struct{}, map[*Value][]*Value) {
 	return nodes, edges
 }
 
-func DrawDot(root *Value) string {
+func DrawDot(root *Value, filename string) string {
 	nodes, edges := trace(root)
 	g := dot.NewGraph("G")
 	g.SetType(dot.DIGRAPH)
@@ -35,7 +35,6 @@ func DrawDot(root *Value) string {
 		nodeID := fmt.Sprintf("%p", n)
 		node, _ := g.AddNode(dot.NewNode(nodeID))
 		node.Set("shape", "record")
-		// node.Set("label", fmt.Sprintf("{ %v | data %.4f | grad %.4f }", n._label, n.data, n.grad))
 		node.Set("label", fmt.Sprintf("{ %s | data %.4f | grad %.4f }", n.Label, n.Data, n.Grad))
 
 		if n.op != "" {
@@ -53,7 +52,7 @@ func DrawDot(root *Value) string {
 		}
 	}
 
-	err := g.ToPNG("test.png")
+	err := g.ToPNG(filename)
 	if err != nil {
 		return err.Error()
 	}
