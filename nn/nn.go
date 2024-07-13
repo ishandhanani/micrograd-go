@@ -26,8 +26,9 @@ func NewNeuron(nin int) *Neuron {
 }
 
 func (n *Neuron) Call(x []*engine.Value) *engine.Value {
-	// note that x must be a slice of length nin
-	// [[wi, xi ],...]
+	if len(x) != len(n.Weight) {
+		panic("Length of x must be equal to length of n.Weight")
+	}
 	zipped := make([][]*engine.Value, len(x))
 	neuron := NewNeuron(len(x))
 	for i := 0; i < len(x); i++ {
@@ -42,3 +43,45 @@ func (n *Neuron) Call(x []*engine.Value) *engine.Value {
 	activation.Data = math.Tanh(activation.Data)
 	return activation
 }
+
+type Layer struct {
+	Neurons []*Neuron
+}
+
+func NewLayer(nin int, nout int) *Layer {
+	var neurons []*Neuron
+	for i := 0; i < nout; i++ {
+		n := NewNeuron(nin)
+		neurons = append(neurons, n)
+	}
+	return &Layer{neurons}
+}
+
+func (l *Layer) Call(x []*engine.Value) []*engine.Value {
+	var outputs []*engine.Value
+	for i := 0; i < len(l.Neurons); i++ {
+		outputs = append(outputs, l.Neurons[i].Call(x))
+	}
+	return outputs
+}
+
+type MLP struct {
+	Layers []*Layer
+}
+
+func NewMLP(nin int, nout []int) *MLP {
+	_ = len(nout) + 1
+	var layers []*Layer
+	// input layer
+	l := NewLayer(1, nin)
+	layers = append(layers, l)
+	// hidden and output layers
+	for i := 0; i < len(nout); i++ {
+		l := NewLayer(nin, nout[i])
+		nin = nout[i]
+		layers = append(layers, l)
+	}
+	return &MLP{layers}
+}
+
+// func (m *MLP) Call(x []*engine.Value) []*engine.Value {
