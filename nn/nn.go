@@ -34,9 +34,10 @@ func (n *Neuron) Call(x []*engine.Value) *engine.Value {
 
 	activation := engine.NewValue(0.0, "", []*engine.Value{})
 	for i := 0; i < len(zipped); i++ {
-		activation.Data += zipped[i][0].Data * zipped[i][1].Data
+		activation = activation.Add(zipped[i][0].Multiply(zipped[i][1]))
 	}
-	activation.Data += neuron.Bias.Data
+	activation = activation.Add(neuron.Bias)
+	activation = activation.Tanh()
 	activation.Data = math.Tanh(activation.Data)
 	return activation
 }
@@ -67,21 +68,16 @@ type MLP struct {
 }
 
 func NewMLP(nin int, nout []int) *MLP {
-	_ = len(nout) + 1
 	var layers []*Layer
-	// input layer
-	l := NewLayer(1, nin)
-	layers = append(layers, l)
-	// hidden and output layers
+	layerSizes := append([]int{nin}, nout...)
 	for i := 0; i < len(nout); i++ {
-		l := NewLayer(nin, nout[i])
-		nin = nout[i]
+		l := NewLayer(layerSizes[i], layerSizes[i+1])
 		layers = append(layers, l)
 	}
 	return &MLP{layers}
 }
 
-func (m *MLP) Call(x []*engine.Value) []*engine.Value {
+func (m *MLP) Forward(x []*engine.Value) []*engine.Value {
 	for _, layer := range m.Layers {
 		new := layer.Call(x)
 		x = new

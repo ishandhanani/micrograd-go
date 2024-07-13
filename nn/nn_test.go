@@ -36,15 +36,29 @@ func Test_MLP(t *testing.T) {
 	x3 := engine.NewValue(-1.0, "x3", []*engine.Value{})
 	x := []*engine.Value{x1, x2, x3}
 
-	finalLayer := 2
+	finalLayer := 1
 	mlp := nn.NewMLP(3, []int{4, 4, finalLayer})
-	assert.Equal(t, len(mlp.Layers), 4)
-	assert.Equal(t, len(mlp.Layers[0].Neurons), 3)
+	assert.Equal(t, len(mlp.Layers), 3)
+	assert.Equal(t, len(mlp.Layers[0].Neurons), 4)
 	assert.Equal(t, len(mlp.Layers[1].Neurons), 4)
-	assert.Equal(t, len(mlp.Layers[2].Neurons), 4)
-	assert.Equal(t, len(mlp.Layers[2].Neurons), 4)
+	assert.Equal(t, len(mlp.Layers[2].Neurons), 1)
 
-	y := mlp.Call(x)
+	y := mlp.Forward(x)
 	assert.Equal(t, len(y), finalLayer)
 	fmt.Println(y)
+}
+
+func Test_MLPDiagram(t *testing.T) {
+	x1 := engine.NewValue(2.0, "x1", []*engine.Value{})
+	x2 := engine.NewValue(3.0, "x2", []*engine.Value{})
+	x3 := engine.NewValue(-1.0, "x3", []*engine.Value{})
+	x := []*engine.Value{x1, x2, x3}
+
+	finalLayer := 1
+	mlp := nn.NewMLP(3, []int{4, 4, finalLayer})
+	y := mlp.Forward(x)
+
+	str := engine.DrawDot(y[0], "testmlp.png")
+
+	fmt.Println(str)
 }
