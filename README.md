@@ -2,6 +2,23 @@
 
 This is a port of the [Micrograd](https://github.com/karpathy/micrograd) library to Go. The core of the library is the `Value` type which is a scalar value with a gradient. Using the `Value` type lets us implement backpropagation over a dynamically built directed acyclic graph (DAG) of values and a small neural network library on top. In theory this is enough to train up deep neural networks for regression and classification based tasks (as shown in the `train.go`).
 
+## Usage
+
+### Running the Training Loop
+
+The example in `train.go` shows a full e2e example of a classification task using a multi-layer perceptron (MLP).
+To run the training loop, use the following command:
+
+```bash
+go run train.go
+```
+
+You can enable verbose output with the `-verbose` flag:
+
+```bash
+go run train.go -verbose
+```
+
 ## Structure
 
 ```
@@ -20,23 +37,6 @@ This is a port of the [Micrograd](https://github.com/karpathy/micrograd) library
 ```
 
 The `engine` package contains the core of the library and implemented the `Value` type which is a scalar value with a gradient. The `nn` package provides a small neural network libary with support for `Neuron`, `Layer`, and `MLP` types. There's also a simple `MSE` loss function implementation. The `graph.go` file contains a helper function to draw the DAG (built using @tmc's [dot](https://github.com/tmc/dot) library).
-
-## Usage
-
-### Running the Training Loop
-
-The example in `train.go` shows a full e2e example of a classification task using a multi-layer perceptron (MLP).
-To run the training loop, use the following command:
-
-```bash
-go run train.go
-```
-
-You can enable verbose output with the `-verbose` flag:
-
-```bash
-go run train.go -verbose
-```
 
 ### Using the Library in Your Project
 
