@@ -101,7 +101,7 @@ func MSE(y_pred, y_obs []*engine.Value) *engine.Value {
 	}
 	sum := engine.NewValue(0.0, "sum", []*engine.Value{})
 	for i := 0; i < len(y_obs); i++ {
-		diff := y_obs[i].Subtract(y_pred[i])
+		diff := y_pred[i].Subtract(y_obs[i])
 		squaredDiff := diff.Multiply(diff)
 		sum = sum.Add(squaredDiff)
 	}

@@ -14,6 +14,7 @@ func main() {
 
 	// Generate random data
 	x := [][]*engine.Value{
+		//j{engine.NewValue(2.0, "x1", []*engine.Value{})},
 		{engine.NewValue(2.0, "x1", []*engine.Value{}), engine.NewValue(3.0, "x2", []*engine.Value{}), engine.NewValue(-1.0, "x3", []*engine.Value{})},
 		{engine.NewValue(3.0, "x1", []*engine.Value{}), engine.NewValue(-1.0, "x2", []*engine.Value{}), engine.NewValue(0.5, "x3", []*engine.Value{})},
 		{engine.NewValue(0.5, "x1", []*engine.Value{}), engine.NewValue(1.0, "x2", []*engine.Value{}), engine.NewValue(1.0, "x3", []*engine.Value{})},
@@ -29,7 +30,7 @@ func main() {
 	mlp := nn.NewMLP(3, []int{4, 4, 1})
 	learningRate := 0.01
 
-	for i := 0; i < 50; i++ {
+	for i := 0; i < 500; i++ {
 		// Forward pass
 		y_pred := make([]*engine.Value, len(x))
 		for j, x_i := range x {
@@ -42,9 +43,10 @@ func main() {
 		// Backward pass
 		loss.BackwardPass()
 
+		// engine.DrawDot(loss, "loss.png")
+
 		// Always print iteration number and loss
 		fmt.Printf("Iteration %d: Loss: %.6f\n", i, loss.Data)
-
 		if *verbose {
 			fmt.Println("Predictions vs Observations:")
 			for j := range y_pred {
@@ -63,7 +65,8 @@ func main() {
 
 		// Update parameters
 		for _, p := range mlp.Parameters() {
-			p.Data = p.Data - (learningRate * -p.Grad)
+			p.Data = p.Data - (learningRate * p.Grad)
+			p.Grad = 0.0
 		}
 	}
 
