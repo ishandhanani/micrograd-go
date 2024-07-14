@@ -44,9 +44,7 @@ func Test_Diagram(t *testing.T) {
 	f := engine.NewValue(-2.0, "f", []*engine.Value{})
 	L := d.Multiply(f).AddLabel("L")
 
-	str := engine.DrawDot(L, "testdiagram.png")
-
-	fmt.Println(str)
+	engine.DrawDot(L, "testdiagram.png")
 }
 
 /**
@@ -93,9 +91,7 @@ func Test_NeuronBackpropExample(t *testing.T) {
 	x1w1.Backward()
 	x2w2.Backward()
 
-	str := engine.DrawDot(o, "testneuralbackprop.png")
-
-	fmt.Println(str)
+	engine.DrawDot(o, "testneuralbackprop.png")
 }
 
 func Test_TopologicalSort(t *testing.T) {
@@ -128,5 +124,5 @@ func Test_AutomaticBackpropagation(t *testing.T) {
 	// automatic backward pass
 	o.BackwardPass()
 
-	_ = engine.DrawDot(o, "testautomaticbackprop.png")
+	engine.DrawDot(o, "testautomaticbackprop.png")
 }

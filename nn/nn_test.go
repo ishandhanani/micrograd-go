@@ -58,7 +58,5 @@ func Test_MLPDiagram(t *testing.T) {
 	mlp := nn.NewMLP(3, []int{4, 4, finalLayer})
 	y := mlp.Forward(x)
 
-	str := engine.DrawDot(y[0], "testmlp.png")
-
-	fmt.Println(str)
+	engine.DrawDot(y[0], "testmlp.png")
 }

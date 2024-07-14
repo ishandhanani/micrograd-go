@@ -20,12 +20,10 @@ func trace(root *Value) (map[*Value]struct{}, map[*Value][]*Value) {
 		}
 	}
 	build(root)
-	fmt.Println(nodes)
-	fmt.Println(edges)
 	return nodes, edges
 }
 
-func DrawDot(root *Value, filename string) string {
+func DrawDot(root *Value, filename string) {
 	nodes, edges := trace(root)
 	g := dot.NewGraph("G")
 	g.SetType(dot.DIGRAPH)
@@ -54,8 +52,6 @@ func DrawDot(root *Value, filename string) string {
 
 	err := g.ToPNG(filename)
 	if err != nil {
-		return err.Error()
+		return
 	}
-
-	return g.String()
 }

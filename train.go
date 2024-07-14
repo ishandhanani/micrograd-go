@@ -43,6 +43,11 @@ func dummyData() {
 		y_pred = append(y_pred, pred_i[0])
 	}
 
+	fmt.Println("\nParameters:")
+	for _, param := range mlp.Parameters() {
+		fmt.Printf("%-15s %-15.6f\n", param.Label, param.Data)
+	}
+
 	// Calculate MSE using engine.Value
 	mse := engine.NewValue(0.0, "mse", []*engine.Value{})
 	for i := 0; i < len(y_obs); i++ {
@@ -57,5 +62,5 @@ func dummyData() {
 	// You can now call Backward on mse
 	mse.BackwardPass()
 
-	_ = engine.DrawDot(mse, "testmse.png")
+	engine.DrawDot(mse, "testmse.png")
 }

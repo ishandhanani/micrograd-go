@@ -42,6 +42,10 @@ func (n *Neuron) Call(x []*engine.Value) *engine.Value {
 	return activation
 }
 
+func (n *Neuron) Parameters() []*engine.Value {
+	return append(n.Weight, n.Bias)
+}
+
 type Layer struct {
 	Neurons []*Neuron
 }
@@ -61,6 +65,14 @@ func (l *Layer) Call(x []*engine.Value) []*engine.Value {
 		outputs = append(outputs, l.Neurons[i].Call(x))
 	}
 	return outputs
+}
+
+func (l *Layer) Parameters() []*engine.Value {
+	var params []*engine.Value
+	for _, n := range l.Neurons {
+		params = append(params, n.Parameters()...)
+	}
+	return params
 }
 
 type MLP struct {
@@ -83,4 +95,12 @@ func (m *MLP) Forward(x []*engine.Value) []*engine.Value {
 		x = new
 	}
 	return x
+}
+
+func (m *MLP) Parameters() []*engine.Value {
+	var params []*engine.Value
+	for _, layer := range m.Layers {
+		params = append(params, layer.Parameters()...)
+	}
+	return params
 }
