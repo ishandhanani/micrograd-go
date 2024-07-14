@@ -55,6 +55,8 @@ You can create a simple MLP as follows:
 mlp := nn.NewMLP(3, []int{4, 4, 1})
 ```
 
+This will create an MLP with 3 input neurons, 2 hidden layers of 4 neurons each, and 1 output neuron.
+
 ## Visualizing the DAG
 
 To visualize the DAG of a neural network, you can use the `Test_Diagram` function in `engine/engine_test.go`.
