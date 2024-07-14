@@ -1,7 +1,6 @@
 package nn
 
 import (
-	"math"
 	"math/rand"
 
 	"github.com/ishandhanani/micrograd-go/engine"
@@ -25,21 +24,12 @@ func NewNeuron(nin int) *Neuron {
 	return &Neuron{w, b}
 }
 
-func (n *Neuron) Call(x []*engine.Value) *engine.Value {
-	zipped := make([][]*engine.Value, len(x))
-	neuron := NewNeuron(len(x))
-	for i := 0; i < len(x); i++ {
-		zipped[i] = []*engine.Value{neuron.Weight[i], x[i]}
+func (n *Neuron) Forward(x []*engine.Value) *engine.Value {
+	activation := n.Bias
+	for i, input := range x {
+		activation = activation.Add(n.Weight[i].Multiply(input))
 	}
-
-	activation := engine.NewValue(0.0, "", []*engine.Value{})
-	for i := 0; i < len(zipped); i++ {
-		activation = activation.Add(zipped[i][0].Multiply(zipped[i][1]))
-	}
-	activation = activation.Add(neuron.Bias)
-	activation = activation.Tanh()
-	activation.Data = math.Tanh(activation.Data)
-	return activation
+	return activation.Tanh()
 }
 
 func (n *Neuron) Parameters() []*engine.Value {
@@ -59,10 +49,10 @@ func NewLayer(nin int, nout int) *Layer {
 	return &Layer{neurons}
 }
 
-func (l *Layer) Call(x []*engine.Value) []*engine.Value {
+func (l *Layer) Forward(x []*engine.Value) []*engine.Value {
 	var outputs []*engine.Value
 	for i := 0; i < len(l.Neurons); i++ {
-		outputs = append(outputs, l.Neurons[i].Call(x))
+		outputs = append(outputs, l.Neurons[i].Forward(x))
 	}
 	return outputs
 }
@@ -91,7 +81,7 @@ func NewMLP(nin int, nout []int) *MLP {
 
 func (m *MLP) Forward(x []*engine.Value) []*engine.Value {
 	for _, layer := range m.Layers {
-		new := layer.Call(x)
+		new := layer.Forward(x)
 		x = new
 	}
 	return x
@@ -103,4 +93,20 @@ func (m *MLP) Parameters() []*engine.Value {
 		params = append(params, layer.Parameters()...)
 	}
 	return params
+}
+
+func MSE(y_pred, y_obs []*engine.Value) *engine.Value {
+	if len(y_pred) != len(y_obs) {
+		panic("y_pred and y_obs must have the same length")
+	}
+	sum := engine.NewValue(0.0, "sum", []*engine.Value{})
+	for i := 0; i < len(y_obs); i++ {
+		diff := y_obs[i].Subtract(y_pred[i])
+		squaredDiff := diff.Multiply(diff)
+		sum = sum.Add(squaredDiff)
+	}
+	// Calculate the mean
+	n := float64(len(y_obs))
+	mean := sum.Multiply(engine.NewValue(1/n, "1/n", []*engine.Value{}))
+	return mean.AddLabel("MSE")
 }

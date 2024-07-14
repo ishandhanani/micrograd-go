@@ -2,17 +2,12 @@ package main
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/ishandhanani/micrograd-go/engine"
 	"github.com/ishandhanani/micrograd-go/nn"
 )
 
 func main() {
-	dummyData()
-}
-
-func dummyData() {
 	// Generate random data
 	x := [][]*engine.Value{
 		{engine.NewValue(2.0, "x1", []*engine.Value{}), engine.NewValue(3.0, "x2", []*engine.Value{}), engine.NewValue(-1.0, "x3", []*engine.Value{})},
@@ -26,41 +21,37 @@ func dummyData() {
 		engine.NewValue(-1.0, "y3", []*engine.Value{}),
 		engine.NewValue(1.0, "y4", []*engine.Value{}),
 	}
-
-	// Test performance of neural network on dummy data
 	mlp := nn.NewMLP(3, []int{4, 4, 1})
 
-	fmt.Println("\nPredictions vs Observations:")
-	fmt.Printf("%-15s %-15s %-15s\n", "Input", "Predicted", "Observed")
-	fmt.Println(strings.Repeat("-", 45))
+	for i := 0; i < 20; i++ {
+		// forward pass
+		y_pred := make([]*engine.Value, len(x))
+		for j, x := range x {
+			y_pred[j] = mlp.Forward(x)[0] // because we have only one layer
+		}
+		loss := nn.MSE(y_pred, y_obs)
 
-	y_pred := []*engine.Value{}
-	for i, x_i := range x {
-		pred_i := mlp.Forward(x_i)
-		fmt.Printf("(%4.1f, %4.1f, %4.1f) %-15.6f %-15.6f\n",
-			x_i[0].Data, x_i[1].Data, x_i[2].Data,
-			pred_i[0].Data, y_obs[i].Data)
-		y_pred = append(y_pred, pred_i[0])
+		// backward pass
+		for _, p := range mlp.Parameters() {
+			p.Grad = 0.0
+		}
+		loss.BackwardPass()
+		engine.DrawDot(loss, "testloss.png")
+
+		// update parameters
+		for _, p := range mlp.Parameters() {
+			p.Data += -0.01 * p.Grad
+		}
+
+		fmt.Printf("Iteration: %d, Loss: %.4f\n", i, loss.Data)
 	}
 
-	fmt.Println("\nParameters:")
-	for _, param := range mlp.Parameters() {
-		fmt.Printf("%-15s %-15.6f\n", param.Label, param.Data)
+	// Print the final predictios and the actual values
+	y_pred := make([]*engine.Value, len(x))
+	for j, x := range x {
+		y_pred[j] = mlp.Forward(x)[0] // because we have only one layer
 	}
-
-	// Calculate MSE using engine.Value
-	mse := engine.NewValue(0.0, "mse", []*engine.Value{})
-	for i := 0; i < len(y_obs); i++ {
-		diff := y_obs[i].Subtract(y_pred[i])
-		squaredDiff := diff.Multiply(diff)
-		mse = mse.Add(squaredDiff)
+	for i, y := range y_pred {
+		fmt.Printf("Predicted: %.4f, Observed: %.4f\n", y.Data, y_obs[i].Data)
 	}
-	mse = mse.Multiply(engine.NewValue(1.0/float64(len(y_obs)), "scale", []*engine.Value{}))
-
-	fmt.Printf("MSE: %f\n", mse.Data)
-
-	// You can now call Backward on mse
-	mse.BackwardPass()
-
-	engine.DrawDot(mse, "testmse.png")
 }
