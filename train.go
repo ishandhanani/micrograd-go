@@ -29,7 +29,7 @@ func main() {
 	mlp := nn.NewMLP(3, []int{4, 4, 1})
 	learningRate := 0.01
 
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 50; i++ {
 		// Forward pass
 		y_pred := make([]*engine.Value, len(x))
 		for j, x_i := range x {
@@ -63,7 +63,7 @@ func main() {
 
 		// Update parameters
 		for _, p := range mlp.Parameters() {
-			p.Data += -learningRate * p.Grad
+			p.Data = p.Data - (learningRate * -p.Grad)
 		}
 	}
 
