@@ -12,9 +12,7 @@ func main() {
 	verbose := flag.Bool("verbose", false, "Enable verbose output")
 	flag.Parse()
 
-	// Generate random data
 	x := [][]*engine.Value{
-		//j{engine.NewValue(2.0, "x1", []*engine.Value{})},
 		{engine.NewValue(2.0, "x1", []*engine.Value{}), engine.NewValue(3.0, "x2", []*engine.Value{}), engine.NewValue(-1.0, "x3", []*engine.Value{})},
 		{engine.NewValue(3.0, "x1", []*engine.Value{}), engine.NewValue(-1.0, "x2", []*engine.Value{}), engine.NewValue(0.5, "x3", []*engine.Value{})},
 		{engine.NewValue(0.5, "x1", []*engine.Value{}), engine.NewValue(1.0, "x2", []*engine.Value{}), engine.NewValue(1.0, "x3", []*engine.Value{})},
@@ -43,9 +41,6 @@ func main() {
 		// Backward pass
 		loss.BackwardPass()
 
-		// engine.DrawDot(loss, "loss.png")
-
-		// Always print iteration number and loss
 		fmt.Printf("Iteration %d: Loss: %.6f\n", i, loss.Data)
 		if *verbose {
 			fmt.Println("Predictions vs Observations:")
@@ -60,17 +55,16 @@ func main() {
 					fmt.Printf("  Param: %.6f, Grad: %.6f, Update: %.6f\n", p.Data, p.Grad, update)
 				}
 			}
-			fmt.Println() // Add a blank line for readability in verbose mode
+			fmt.Println()
 		}
 
-		// Update parameters
+		// Optimizer
 		for _, p := range mlp.Parameters() {
 			p.Data = p.Data - (learningRate * p.Grad)
 			p.Grad = 0.0
 		}
 	}
 
-	// Always print final predictions
 	fmt.Println("\nFinal Predictions:")
 	for j, x_i := range x {
 		pred := mlp.Forward(x_i)[0].Data
