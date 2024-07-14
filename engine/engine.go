@@ -28,7 +28,7 @@ func (v *Value) Add(v2 *Value) *Value {
 }
 
 func (v *Value) Subtract(v2 *Value) *Value {
-	out := &Value{Data: v.Data - v2.Data, prev: []*Value{v, v2}, op: "+"}
+	out := &Value{Data: v2.Data - v.Data, prev: []*Value{v, v2}, op: "+"}
 	out.Backward = func() {
 		v.Grad += 1.0 * out.Grad
 		v2.Grad += 1.0 * out.Grad
