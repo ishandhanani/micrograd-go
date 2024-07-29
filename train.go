@@ -8,57 +8,61 @@ import (
 	"github.com/ishandhanani/micrograd-go/nn"
 )
 
+var (
+	interactiveMode = flag.Bool("i", false, "Run in interactive mode")
+	verboseOutput   = flag.Bool("v", false, "Enable verbose output")
+)
+
 func main() {
-	verbose := flag.Bool("verbose", false, "Enable verbose output")
 	flag.Parse()
 
+	if *interactiveMode {
+		RunInteractiveMode()
+	} else if flag.NFlag() == 0 || (flag.NFlag() == 1 && *verboseOutput) {
+		runDefaultTraining(*verboseOutput)
+	} else {
+		fmt.Println("Invalid flag combination. Use -i for interactive mode or no flags for default training. -v can be used with either mode.")
+	}
+}
+
+func runDefaultTraining(verbose bool) {
 	x := [][]*engine.Value{
-		{engine.NewValue(2.0, "x1", []*engine.Value{}), engine.NewValue(3.0, "x2", []*engine.Value{}), engine.NewValue(-1.0, "x3", []*engine.Value{})},
-		{engine.NewValue(3.0, "x1", []*engine.Value{}), engine.NewValue(-1.0, "x2", []*engine.Value{}), engine.NewValue(0.5, "x3", []*engine.Value{})},
-		{engine.NewValue(0.5, "x1", []*engine.Value{}), engine.NewValue(1.0, "x2", []*engine.Value{}), engine.NewValue(1.0, "x3", []*engine.Value{})},
-		{engine.NewValue(1.0, "x1", []*engine.Value{}), engine.NewValue(1.0, "x2", []*engine.Value{}), engine.NewValue(-1.0, "x3", []*engine.Value{})},
+		{engine.NewValue(2.0, "x1", nil), engine.NewValue(3.0, "x2", nil), engine.NewValue(-1.0, "x3", nil)},
+		{engine.NewValue(3.0, "x1", nil), engine.NewValue(-1.0, "x2", nil), engine.NewValue(0.5, "x3", nil)},
+		{engine.NewValue(0.5, "x1", nil), engine.NewValue(1.0, "x2", nil), engine.NewValue(1.0, "x3", nil)},
+		{engine.NewValue(1.0, "x1", nil), engine.NewValue(1.0, "x2", nil), engine.NewValue(-1.0, "x3", nil)},
 	}
 	y_obs := []*engine.Value{
-		engine.NewValue(1.0, "y1", []*engine.Value{}),
-		engine.NewValue(-1.0, "y2", []*engine.Value{}),
-		engine.NewValue(-1.0, "y3", []*engine.Value{}),
-		engine.NewValue(1.0, "y4", []*engine.Value{}),
+		engine.NewValue(1.0, "y1", nil),
+		engine.NewValue(-1.0, "y2", nil),
+		engine.NewValue(-1.0, "y3", nil),
+		engine.NewValue(1.0, "y4", nil),
 	}
 
 	mlp := nn.NewMLP(3, []int{4, 4, 1})
 	learningRate := 0.01
 
 	for i := 0; i < 500; i++ {
-		// Forward pass
 		y_pred := make([]*engine.Value, len(x))
 		for j, x_i := range x {
 			y_pred[j] = mlp.Forward(x_i)[0]
 		}
 
-		// Compute loss
 		loss := nn.MSE(y_pred, y_obs)
-
-		// Backward pass
 		loss.BackwardPass()
 
-		fmt.Printf("Iteration %d: Loss: %.6f\n", i, loss.Data)
-		if *verbose {
-			fmt.Println("Predictions vs Observations:")
-			for j := range y_pred {
-				fmt.Printf("  Pred: %.6f, Obs: %.6f\n", y_pred[j].Data, y_obs[j].Data)
-			}
+		if verbose || i%100 == 0 || i == 499 {
+			fmt.Printf("Iteration %d: Loss: %.6f\n", i, loss.Data)
+		}
 
-			fmt.Println("Sample gradients and updates:")
-			for j, p := range mlp.Parameters() {
-				if j < 5 { // Print first 5 parameters
-					update := -learningRate * p.Grad
-					fmt.Printf("  Param: %.6f, Grad: %.6f, Update: %.6f\n", p.Data, p.Grad, update)
-				}
+		if verbose && (i%100 == 0 || i == 499) {
+			fmt.Println("Sample predictions:")
+			for j := 0; j < len(y_pred) && j < 2; j++ {
+				fmt.Printf("  Input %d: Pred: %.6f, Obs: %.6f\n", j, y_pred[j].Data, y_obs[j].Data)
 			}
 			fmt.Println()
 		}
 
-		// Optimizer
 		for _, p := range mlp.Parameters() {
 			p.Data = p.Data - (learningRate * p.Grad)
 			p.Grad = 0.0
